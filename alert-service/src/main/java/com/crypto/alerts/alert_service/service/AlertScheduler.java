@@ -1,8 +1,12 @@
 package com.crypto.alerts.alert_service.service;
 
 import com.crypto.alerts.alert_service.client.PriceServiceClient;
+import com.crypto.alerts.alert_service.client.UserServiceClient;
+import com.crypto.alerts.alert_service.dto.UserResponseDTO;
 import com.crypto.alerts.alert_service.entity.Alert;
 import com.crypto.alerts.alert_service.repository.AlertRepository;
+import com.crypto.alerts.alert_service.service.JwtUtilService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class AlertScheduler {
@@ -18,10 +23,12 @@ public class AlertScheduler {
 
     private final AlertRepository alertRepository;
     private final PriceServiceClient priceServiceClient;
+    private final UserServiceClient userServiceClient;
 
-    public AlertScheduler(AlertRepository alertRepository, PriceServiceClient priceServiceClient) {
+    public AlertScheduler(AlertRepository alertRepository, PriceServiceClient priceServiceClient, UserServiceClient userServiceClient) {
         this.alertRepository = alertRepository;
         this.priceServiceClient = priceServiceClient;
+        this.userServiceClient = userServiceClient;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -53,6 +60,9 @@ public class AlertScheduler {
                         alert.getThreshold(),
                         currentPrice
                 );
+
+                UserResponseDTO user = userServiceClient.getUser(alert.getUserId());
+                log.info("User email found: " + user.getEmail());
 
                 alertRepository.delete(alert);
 
