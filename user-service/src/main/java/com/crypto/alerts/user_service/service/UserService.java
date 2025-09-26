@@ -25,7 +25,6 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    // Register user
     public UserResponseDTO createUser(UserRequestDTO dto) {
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         User user = new User(dto.getName(), dto.getEmail(), encodedPassword);
@@ -33,25 +32,21 @@ public class UserService {
         return new UserResponseDTO(saved.getId().toString(), saved.getName(), saved.getEmail());
     }
 
-    // Get all users
     public List<UserResponseDTO> getAllUsers() {
         return repo.findAll().stream()
                 .map(u -> new UserResponseDTO(u.getId().toString(), u.getName(), u.getEmail()))
                 .collect(Collectors.toList());
     }
 
-    // Get user by ID
     public UserResponseDTO getUser(UUID id) {
         User user = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         return new UserResponseDTO(user.getId().toString(), user.getName(), user.getEmail());
     }
 
-    // Find user by email
     public User findByEmail(String email) {
         return repo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // Login
     public String login(String email, String password) {
         User user = findByEmail(email);
         if (!passwordEncoder.matches(password, user.getPassword())) {

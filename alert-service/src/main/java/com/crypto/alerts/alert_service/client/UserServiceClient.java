@@ -2,11 +2,8 @@ package com.crypto.alerts.alert_service.client;
 
 import com.crypto.alerts.alert_service.dto.UserResponseDTO;
 import com.crypto.alerts.alert_service.service.JwtUtilService;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.math.BigDecimal;
 
 @Component
 public class UserServiceClient {

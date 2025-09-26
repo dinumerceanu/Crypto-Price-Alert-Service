@@ -4,7 +4,6 @@ import com.crypto.alerts.alert_service.dto.CreateAlertRequestDTO;
 import com.crypto.alerts.alert_service.entity.Alert;
 import com.crypto.alerts.alert_service.repository.AlertRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
 
