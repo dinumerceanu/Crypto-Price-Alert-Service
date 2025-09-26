@@ -1,7 +1,9 @@
 package com.crypto.alerts.alert_service.service;
 
+import com.crypto.alerts.alert_service.client.NotificationServiceClient;
 import com.crypto.alerts.alert_service.client.PriceServiceClient;
 import com.crypto.alerts.alert_service.client.UserServiceClient;
+import com.crypto.alerts.alert_service.dto.NotificationRequestDTO;
 import com.crypto.alerts.alert_service.dto.UserResponseDTO;
 import com.crypto.alerts.alert_service.entity.Alert;
 import com.crypto.alerts.alert_service.repository.AlertRepository;
@@ -24,11 +26,18 @@ public class AlertScheduler {
     private final AlertRepository alertRepository;
     private final PriceServiceClient priceServiceClient;
     private final UserServiceClient userServiceClient;
+    private final NotificationServiceClient notificationServiceClient;
 
-    public AlertScheduler(AlertRepository alertRepository, PriceServiceClient priceServiceClient, UserServiceClient userServiceClient) {
+    public AlertScheduler(
+            AlertRepository alertRepository,
+            PriceServiceClient priceServiceClient,
+            UserServiceClient userServiceClient,
+            NotificationServiceClient notificationServiceClient
+    ) {
         this.alertRepository = alertRepository;
         this.priceServiceClient = priceServiceClient;
         this.userServiceClient = userServiceClient;
+        this.notificationServiceClient = notificationServiceClient;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -64,9 +73,16 @@ public class AlertScheduler {
                 UserResponseDTO user = userServiceClient.getUser(alert.getUserId());
                 log.info("User email found: " + user.getEmail());
 
-                alertRepository.delete(alert);
+                NotificationRequestDTO notificationRequestDTO = new NotificationRequestDTO();
+                notificationRequestDTO.setEmail(user.getEmail());
+                notificationRequestDTO.setSubject("Alert triggered: " + alert.getSymbol());
+                notificationRequestDTO.setBody(alert.getSymbol().toUpperCase() + " crossed "
+                        + alert.getDirection() + " " + alert.getThreshold()
+                        + " (currently at " + currentPrice + ")");
 
-                // TODO: send notification to user
+                notificationServiceClient.sendNotification(notificationRequestDTO);
+
+                alertRepository.delete(alert);
             }
         }
     }
